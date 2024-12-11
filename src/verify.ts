@@ -1,15 +1,15 @@
 import forge from 'node-forge';
-import { runParser } from "@futpib/parser";
-import { apkSignableSectionsParser } from "@futpib/parser/build/apkParser.js";
-import { uint8ArrayParserInputCompanion } from "@futpib/parser/build/parserInputCompanion.js";
-import { hashApkSignableSections } from "./sign.js";
-import { zipEndOfCentralDirectoryRecordParser } from '@futpib/parser/build/zipParser.js';
-import { runUnparser } from '@futpib/parser/build/unparser.js';
-import { zipEndOfCentralDirectoryRecordUnparser } from '@futpib/parser/build/zipUnparser.js';
-import { uint8ArrayUnparserOutputCompanion } from '@futpib/parser/build/unparserOutputCompanion.js';
+import { runParser } from '@futpib/parser';
+import { apkSignableSectionsParser } from '@futpib/parser/build/apkParser.js';
+import { uint8ArrayParserInputCompanion } from '@futpib/parser/build/parserInputCompanion.js';
+import {zipEndOfCentralDirectoryRecordParser} from '@futpib/parser/build/zipParser.js';
+import {runUnparser} from '@futpib/parser/build/unparser.js';
+import {zipEndOfCentralDirectoryRecordUnparser} from '@futpib/parser/build/zipUnparser.js';
+import {uint8ArrayUnparserOutputCompanion} from '@futpib/parser/build/unparserOutputCompanion.js';
 import invariant from 'invariant';
-import { apkSignatureV2SignedDataUnparser } from '@futpib/parser/build/apkUnparser.js';
-import { uint8ArrayAsyncIterableToUint8Array } from '@futpib/parser/build/uint8Array.js';
+import {apkSignatureV2SignedDataUnparser} from '@futpib/parser/build/apkUnparser.js';
+import {uint8ArrayAsyncIterableToUint8Array} from '@futpib/parser/build/uint8Array.js';
+import {hashApkSignableSections} from './sign.js';
 
 export async function verifyApk({
 	apk,
@@ -44,6 +44,7 @@ export async function verifyApk({
 		for await (const chunk of modifiedZipEndOfCentralDirectoryStream) {
 			chunks.push(chunk);
 		}
+
 		return chunks;
 	})());
 
@@ -59,7 +60,7 @@ export async function verifyApk({
 
 	const expectedDigest = (
 		signer.signedData.digests
-			.find(digest => digest.signatureAlgorithmId === 0x0103)?.digest
+			.find(digest => digest.signatureAlgorithmId === 0x01_03)?.digest
 	);
 
 	invariant(expectedDigest, 'A digest must be present in the signed apk');
@@ -93,7 +94,7 @@ export async function verifyApk({
 		'Public key from private key does not match public key from certificate',
 	);
 
-	const signatureUint8Array = signer.signatures.find(signature => signature.signatureAlgorithmId === 0x0103)?.signature;
+	const signatureUint8Array = signer.signatures.find(signature => signature.signatureAlgorithmId === 0x01_03)?.signature;
 
 	invariant(signatureUint8Array, 'A signature must be present in the signed apk');
 
@@ -115,6 +116,6 @@ export async function verifyApk({
 	return publicKeyFromSigner.verify(
 		signedDataDigest.digest().getBytes(),
 		forge.util.binary.raw.encode(signatureUint8Array),
-		"RSASSA-PKCS1-V1_5",
+		'RSASSA-PKCS1-V1_5',
 	);
 }

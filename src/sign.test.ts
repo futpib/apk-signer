@@ -1,13 +1,13 @@
 import test from 'ava';
-import { signApk } from './sign.js';
-import { runParser } from '@futpib/parser';
-import { apkParser } from '@futpib/parser/build/apkParser.js';
-import { uint8ArrayParserInputCompanion } from '@futpib/parser/build/parserInputCompanion.js';
-import { uint8ArrayAsyncIterableToUint8Array } from '@futpib/parser/build/uint8Array.js';
+import {runParser} from '@futpib/parser';
+import {apkParser} from '@futpib/parser/build/apkParser.js';
+import {uint8ArrayParserInputCompanion} from '@futpib/parser/build/parserInputCompanion.js';
+import {uint8ArrayAsyncIterableToUint8Array} from '@futpib/parser/build/uint8Array.js';
+import {signApk} from './sign.js';
 
 const debugKeystoreCid = 'bafkreibeonabgxzrmcpkrqjz6wvgono2qaqi2p5fmd43hvgzypzcnm3mgy';
 const unsignedApkCid = 'bafkreig4z3omzuc3g3zp4t26coodtfmtumifvvtfupdi4essrwbvs45phy';
-const signedApkCid = 'bafkreidccgxv2jq3hnio73i4etdamhy7ufsjnwesvlkafqjskro34umabu'
+const signedApkCid = 'bafkreidccgxv2jq3hnio73i4etdamhy7ufsjnwesvlkafqjskro34umabu';
 
 async function fetchCidStream(cid: string) {
 	const response = await fetch('https://ipfs.io/ipfs/' + cid);

@@ -46,6 +46,7 @@ async function hashChunkHashes(chunkHashes: Uint8Array[]) {
 	for (const chunkHash of chunkHashes) {
 		hash.update(chunkHash);
 	}
+
 	return hash.digest();
 }
 
@@ -58,6 +59,7 @@ function hashChunkHashesWithForge(chunkHashes: Uint8Array[]) {
 	for (const chunkHash of chunkHashes) {
 		messageDigest.update(forge.util.binary.raw.encode(chunkHash));
 	}
+
 	return messageDigest;
 }
 
@@ -77,7 +79,7 @@ export async function hashApkSignableSections_(apkSignableSections: Uint8Array[]
 	return apkSignableSectionsMessageDigest;
 }
 
-const signatureAlgorithmId = 0x0103;
+const signatureAlgorithmId = 0x01_03;
 
 export async function * signApk({
 	apk,
@@ -124,8 +126,8 @@ export async function * signApk({
 
 	const certificateUint8Array = forge.util.binary.raw.decode(
 		forge.asn1.toDer(
-			forge.pki.certificateToAsn1(certificate)
-		).getBytes()
+			forge.pki.certificateToAsn1(certificate),
+		).getBytes(),
 	);
 
 	const signedData = {
@@ -177,9 +179,9 @@ export async function * signApk({
 	const publicKeyUint8Array = forge.util.binary.raw.decode(
 		forge.asn1.toDer(
 			forge.pki.publicKeyToAsn1(
-				publicKeyFromPrivateKey
-			)
-		).getBytes()
+				publicKeyFromPrivateKey,
+			),
+		).getBytes(),
 	);
 
 	const signer: ApkSignatureV2Signer = {

@@ -1,7 +1,7 @@
 import test from 'ava';
 import { verifyApk } from './verify.js';
 
-const signedApkCid = 'bafkreidccgxv2jq3hnio73i4etdamhy7ufsjnwesvlkafqjskro34umabu'
+const signedApkCid = 'bafkreidccgxv2jq3hnio73i4etdamhy7ufsjnwesvlkafqjskro34umabu';
 
 async function fetchCidStream(cid: string) {
 	const response = await fetch('https://ipfs.io/ipfs/' + cid);
