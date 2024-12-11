@@ -1,17 +1,17 @@
-# TODO
+# apk-signer
 
-> TODO
+> apk-signer
 
-[![Build Status](https://travis-ci.org/futpib/TODO.svg?branch=master)](https://travis-ci.org/futpib/TODO) [![Coverage Status](https://coveralls.io/repos/github/futpib/TODO/badge.svg?branch=master)](https://coveralls.io/github/futpib/TODO?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/futpib/apk-signer/badge.svg?branch=master)](https://coveralls.io/github/futpib/apk-signer?branch=master)
 
 ## Example
 
 ```js
-// TODO
+// apk-signer
 ```
 
 ## Install
 
 ```
-yarn add --dev TODO
+yarn add --dev apk-signer
 ```

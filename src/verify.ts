@@ -71,7 +71,7 @@ export async function verifyApk({
 
 	const certificate = forge.pki.certificateFromAsn1(
 		forge.asn1.fromDer(
-			forge.util.createBuffer(certificateUint8Array),
+			forge.util.binary.raw.encode(certificateUint8Array),
 		),
 	);
 

@@ -1,8 +1,8 @@
 {
-  "name": "TODO",
+  "name": "@futpib/apk-signer",
   "version": "1.0.0",
   "main": "build/index.js",
-  "license": "TODO",
+  "license": "GPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "tsc --watch",
@@ -10,7 +10,7 @@
     "test": "xo && c8 ava",
     "prepack": "yarn build"
   },
-  "homepage": "https://github.com/futpib/TODO",
+  "homepage": "https://github.com/futpib/apk-signer",
   "ava": {
     "typescript": {
       "rewritePaths": {
@@ -22,14 +22,14 @@
   },
   "devDependencies": {
     "@ava/typescript": "^5.0.0",
-    "@types/invariant": "^2",
-    "@types/node": "^22.10.1",
-    "@types/node-forge": "^1",
+    "@types/invariant": "^2.2.37",
+    "@types/node": "^22.10.2",
+    "@types/node-forge": "^1.3.11",
     "ava": "^6.2.0",
-    "c8": "^10.1.2",
+    "c8": "^10.1.3",
     "coveralls": "^3.1.1",
-    "eslint-config-xo-overrides": "^1.5.0",
-    "typescript": "^5.6.3",
+    "eslint-config-xo-overrides": "^1.6.0",
+    "typescript": "^5.7.2",
     "xo": "^0.60.0"
   },
   "xo": {
@@ -42,11 +42,8 @@
   },
   "packageManager": "yarn@4.5.3",
   "dependencies": {
-    "@futpib/parser": "^1.0.0",
+    "@futpib/parser": "^1.0.1",
     "invariant": "^2.2.4",
     "node-forge": "^1.3.1"
-  },
-  "resolutions": {
-    "@futpib/parser": "portal:/home/romang/code/parser"
   }
 }
