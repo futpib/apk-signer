@@ -1,6 +1,6 @@
 import test from 'ava';
 import {runParser} from '@futpib/parser';
-import {apkParser} from '@futpib/parser/build/apkParser.js';
+import {androidPackageParser} from '@futpib/parser/build/androidPackageParser.js';
 import {uint8ArrayParserInputCompanion} from '@futpib/parser/build/parserInputCompanion.js';
 import {uint8ArrayAsyncIterableToUint8Array} from '@futpib/parser/build/uint8Array.js';
 import {signApk} from './sign.js';
@@ -27,8 +27,8 @@ test('signApk', async t => {
 		keystorePassword: 'android',
 	});
 
-	const actualSignedApk = await runParser(apkParser, actualSignedApkStream, uint8ArrayParserInputCompanion);
-	const expectedSignedApk = await runParser(apkParser, expectedSignedApkStream, uint8ArrayParserInputCompanion);
+	const actualSignedApk = await runParser(androidPackageParser, actualSignedApkStream, uint8ArrayParserInputCompanion);
+	const expectedSignedApk = await runParser(androidPackageParser, expectedSignedApkStream, uint8ArrayParserInputCompanion);
 
 	t.deepEqual(actualSignedApk, expectedSignedApk);
 });

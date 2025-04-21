@@ -1,13 +1,13 @@
 import forge from 'node-forge';
 import { runParser } from '@futpib/parser';
-import { apkSignableSectionsParser } from '@futpib/parser/build/apkParser.js';
+import { androidPackageSignableSectionsParser } from '@futpib/parser/build/androidPackageParser.js';
 import { uint8ArrayParserInputCompanion } from '@futpib/parser/build/parserInputCompanion.js';
 import {zipEndOfCentralDirectoryRecordParser} from '@futpib/parser/build/zipParser.js';
 import {runUnparser} from '@futpib/parser/build/unparser.js';
 import {zipEndOfCentralDirectoryRecordUnparser} from '@futpib/parser/build/zipUnparser.js';
 import {uint8ArrayUnparserOutputCompanion} from '@futpib/parser/build/unparserOutputCompanion.js';
 import invariant from 'invariant';
-import {apkSignatureV2SignedDataUnparser} from '@futpib/parser/build/apkUnparser.js';
+import {androidPackageSignatureV2SignedDataUnparser} from '@futpib/parser/build/androidPackageUnparser.js';
 import {uint8ArrayAsyncIterableToUint8Array} from '@futpib/parser/build/uint8Array.js';
 import {hashApkSignableSections} from './sign.js';
 
@@ -16,19 +16,19 @@ export async function verifyApk({
 }: {
 	apk: Uint8Array | AsyncIterable<Uint8Array>;
 }) {
-	const signedApkSignableSections = await runParser(apkSignableSectionsParser, apk, uint8ArrayParserInputCompanion);
+	const signedApkSignableSections = await runParser(androidPackageSignableSectionsParser, apk, uint8ArrayParserInputCompanion);
 
 	const {
 		zipLocalFilesUint8Array,
 		zipCentralDirectoryUint8Array,
 		zipEndOfCentralDirectoryUint8Array,
 
-		apkSigningBlock,
+		androidPackageSigningBlock,
 	} = signedApkSignableSections;
 
-	invariant(apkSigningBlock, 'APK signing block must be present');
+	invariant(androidPackageSigningBlock, 'APK signing block must be present');
 
-	const signer = apkSigningBlock.signatureV2?.signers.at(0);
+	const signer = androidPackageSigningBlock.signatureV2?.signers.at(0);
 
 	invariant(signer, 'APK signer must be present');
 
@@ -98,11 +98,7 @@ export async function verifyApk({
 
 	invariant(signatureUint8Array, 'A signature must be present in the signed apk');
 
-	const modifiedSignedData = {
-		...signer.signedData,
-	};
-
-	const signedDataAsyncIterable = runUnparser(apkSignatureV2SignedDataUnparser, modifiedSignedData, uint8ArrayUnparserOutputCompanion);
+	const signedDataAsyncIterable = runUnparser(androidPackageSignatureV2SignedDataUnparser, signer.signedData, uint8ArrayUnparserOutputCompanion);
 	const signedDataUint8Array = await uint8ArrayAsyncIterableToUint8Array(signedDataAsyncIterable);
 	const modifiedSignedDataUint8Array = signedDataUint8Array.subarray(4);
 

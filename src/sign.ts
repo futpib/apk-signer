@@ -2,14 +2,14 @@ import crypto from 'node:crypto';
 import forge from 'node-forge';
 import { runParser } from '@futpib/parser';
 import { runUnparser } from '@futpib/parser/build/unparser.js';
-import { apkSignatureV2SignedDataUnparser, apkSigningBlockUnparser } from '@futpib/parser/build/apkUnparser.js';
+import { androidPackageSignatureV2SignedDataUnparser, androidPackageSigningBlockUnparser } from '@futpib/parser/build/androidPackageUnparser.js';
 import { zipEndOfCentralDirectoryRecordParser } from '@futpib/parser/build/zipParser.js';
 import { zipEndOfCentralDirectoryRecordUnparser } from '@futpib/parser/build/zipUnparser.js';
-import { apkSignableSectionsParser } from '@futpib/parser/build/apkParser.js';
+import { androidPackageSignableSectionsParser } from '@futpib/parser/build/androidPackageParser.js';
 import { uint8ArrayParserInputCompanion } from '@futpib/parser/build/parserInputCompanion.js';
 import { uint8ArrayUnparserOutputCompanion } from '@futpib/parser/build/unparserOutputCompanion.js';
 import invariant from 'invariant';
-import { ApkSignatureV2, ApkSignatureV2Signer, ApkSigningBlock } from '@futpib/parser/build/apk.js';
+import { AndroidPackageSignatureV2, AndroidPackageSignatureV2Signer, AndroidPackageSigningBlock } from '@futpib/parser/build/androidPackage.js';
 import { uint8ArrayAsyncIterableToUint8Array } from '@futpib/parser/build/uint8Array.js';
 
 function apkSignableSectionToChunks(uint8Array: Uint8Array) {
@@ -79,6 +79,20 @@ export async function hashApkSignableSections_(apkSignableSections: Uint8Array[]
 	return apkSignableSectionsMessageDigest;
 }
 
+async function modifyZipEndOfCentralDirectoryRecord(
+	zipEndOfCentralDirectoryUint8Array: Uint8Array,
+	startOfCentralDirectory: number,
+): Promise<Uint8Array> {
+	const zipEndOfCentralDirectoryRecord = await runParser(zipEndOfCentralDirectoryRecordParser, zipEndOfCentralDirectoryUint8Array, uint8ArrayParserInputCompanion);
+
+	const modifiedZipEndOfCentralDirectoryStream = runUnparser(zipEndOfCentralDirectoryRecordUnparser, {
+		...zipEndOfCentralDirectoryRecord,
+		offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber: startOfCentralDirectory,
+	}, uint8ArrayUnparserOutputCompanion);
+
+	return uint8ArrayAsyncIterableToUint8Array(modifiedZipEndOfCentralDirectoryStream);
+}
+
 const signatureAlgorithmId = 0x01_03;
 
 export async function * signApk({
@@ -90,13 +104,18 @@ export async function * signApk({
 	keystore: Uint8Array;
 	keystorePassword: string;
 }): AsyncIterable<Uint8Array> {
-	const unsignedApkSignableSections = await runParser(apkSignableSectionsParser, apk, uint8ArrayParserInputCompanion);
+	const unsignedApkSignableSections = await runParser(androidPackageSignableSectionsParser, apk, uint8ArrayParserInputCompanion);
 
 	const {
 		zipLocalFilesUint8Array,
 		zipCentralDirectoryUint8Array,
-		zipEndOfCentralDirectoryUint8Array,
+		zipEndOfCentralDirectoryUint8Array: zipEndOfCentralDirectoryUint8ArrayOriginal,
 	} = unsignedApkSignableSections;
+
+	const zipEndOfCentralDirectoryUint8Array = await modifyZipEndOfCentralDirectoryRecord(
+		zipEndOfCentralDirectoryUint8ArrayOriginal,
+		zipLocalFilesUint8Array.length,
+	);
 
 	const apkSignableSectionsMessageDigest = await hashApkSignableSections([
 		zipLocalFilesUint8Array,
@@ -146,7 +165,7 @@ export async function * signApk({
 
 	const signedDataUint8Array = await uint8ArrayAsyncIterableToUint8Array(
 		runUnparser(
-			apkSignatureV2SignedDataUnparser,
+			androidPackageSignatureV2SignedDataUnparser,
 			signedData,
 			uint8ArrayUnparserOutputCompanion,
 		),
@@ -184,7 +203,7 @@ export async function * signApk({
 		).getBytes(),
 	);
 
-	const signer: ApkSignatureV2Signer = {
+	const signer: AndroidPackageSignatureV2Signer = {
 		signedData,
 		signatures: [
 			{
@@ -195,32 +214,30 @@ export async function * signApk({
 		publicKey: publicKeyUint8Array,
 	};
 
-	const signatureV2: ApkSignatureV2 = {
+	const signatureV2: AndroidPackageSignatureV2 = {
 		signers: [
 			signer,
 		],
 	};
 
-	const apkSigningBlock: ApkSigningBlock = {
+	const apkSigningBlock: AndroidPackageSigningBlock = {
 		pairs: [],
 		signatureV2,
 		zeroPaddingLength: 2650,
 	};
 
-	const zipEndOfCentralDirectoryRecord = await runParser(zipEndOfCentralDirectoryRecordParser, zipEndOfCentralDirectoryUint8Array, uint8ArrayParserInputCompanion);
-
 	yield * runUnparser(async function * (_input, unparserContext) {
 		yield zipLocalFilesUint8Array;
 
-		yield * runUnparser(apkSigningBlockUnparser, apkSigningBlock, uint8ArrayUnparserOutputCompanion);
+		yield * runUnparser(androidPackageSigningBlockUnparser, apkSigningBlock, uint8ArrayUnparserOutputCompanion);
 
 		const startOfCentralDirectory = unparserContext.position;
 
 		yield zipCentralDirectoryUint8Array;
 
-		yield * runUnparser(zipEndOfCentralDirectoryRecordUnparser, {
-			...zipEndOfCentralDirectoryRecord,
-			offsetOfStartOfCentralDirectoryWithRespectToTheStartingDiskNumber: startOfCentralDirectory,
-		}, uint8ArrayUnparserOutputCompanion);
+		yield await modifyZipEndOfCentralDirectoryRecord(
+			zipEndOfCentralDirectoryUint8Array,
+			startOfCentralDirectory,
+		);
 	}, undefined, uint8ArrayUnparserOutputCompanion);
 }
